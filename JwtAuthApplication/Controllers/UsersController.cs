@@ -1,21 +1,13 @@
-﻿
-using System.Collections.Generic;
-
-
-namespace JwtAuthApplication.Controllers
+﻿namespace JwtAuthApplication.Controllers
 {
-    using System;
-    using System.IdentityModel.Tokens.Jwt;
     using System.Linq;
-    using System.Security.Claims;
-    using System.Text;
+    using System.Collections.Generic;
 
-    using JwtAuthApplication.Constants;
     using JwtAuthApplication.Models;
+    using JwtAuthApplication.Services;
 
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.IdentityModel.Tokens;
 
     [Authorize]
     [Route("api/[controller]")]
@@ -41,31 +33,10 @@ namespace JwtAuthApplication.Controllers
                 return BadRequest(new { message = "Username or password is incorrect" });
             }
 
-            string token = this.GenerateToken(user);
+            var tokenInfo = JwtTokenGeneratorService.GenerateToken(user);
+            tokenInfo.UserName = user.Name;
 
-            var response = new { access_token = token, username = user.Name };
-            return Ok(response);
-        }
-          
-
-
-        private string GenerateToken(User user)
-        {
-            // create JWT token
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(AuthConstants.SecretKey);
-            var tokenDescriptor = new SecurityTokenDescriptor
-                                      {
-                                          Subject = new ClaimsIdentity(new Claim[]
-                                                                           {
-                                                                               new Claim(ClaimTypes.Name, user.Name)
-                                                                           }),
-                                          Expires = DateTime.UtcNow.AddMinutes(AuthConstants.TokenLifeTime),
-                                          SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-                                      };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            return Ok(tokenInfo);
         }
     }
 }

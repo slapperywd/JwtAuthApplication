@@ -62,8 +62,7 @@ namespace JwtAuthApplication
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseMvc();
+     
 
             // global cors policy
             app.UseCors(x => x
@@ -73,6 +72,7 @@ namespace JwtAuthApplication
                 .AllowCredentials());
 
             app.UseAuthentication();
+            app.UseMvc();
         }
     }
 }
